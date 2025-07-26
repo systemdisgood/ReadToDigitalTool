@@ -4,31 +4,25 @@
 
 typedef unsigned large_unsigned;
 
-typedef unsigned phase_t;
-phase_t  max_phase_t = -1;
+typedef unsigned nco_counter_t;
+nco_counter_t  max_beep_nco_counter = -1; // unsigned underflow 
 
-phase_t beep_phase = 0;
+nco_counter_t beep_nco_counter = 0; // beep phase is beep_nco_counter / max_beep_nco_counter
 
 // A - zero
-// E - zero or one (zerone)
+// E - zero or one (stuffing)
 // B - one
-double zero_frequency = 641;
-double zerone = 0;
-double one_frequency = 440;
-unsigned sampling_frequency = 44100;
 
-void phase_step(phase_t* phase, phase_t step)
-{
-	*phase += step;
-}
+const double zero_frequency = 440;
+const double stuffing_frequency = 659.26;
+const double one_frequency = 997.76;
+const unsigned sampling_frequency = 44100;
 
 unsigned infile_name_len = 0;
 FILE* infile = NULL;
 
 unsigned outfile_name_len = 0;
 FILE* outfile = NULL;
-
-
 
 large_unsigned get_ascii_quantity(FILE* infile)
 {
