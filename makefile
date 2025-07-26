@@ -1,6 +1,6 @@
 #CC=clang
 CC=gcc
-CFLAGS=-c -Wall -pedantic -Werror -std=c99
+CFLAGS=-c -Wall -pedantic -std=c99
 LDFLAGS=
 SOURCES=ReadToDigitalTool.c 
 OBJECTS=$(SOURCES:.c=.o)

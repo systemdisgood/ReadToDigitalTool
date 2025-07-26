@@ -20,14 +20,15 @@ if __name__ == "__main__":
         print("TOO FEW ARGUMENTS!")
         sys.exit()
     with wave.open(args[0], 'wb') as outfile:
+        samples_count = 67000
         outfile.setnchannels(1)
         outfile.setsampwidth(1)
         outfile.setframerate(44100)
-        outfile.writeframes(bytes([5 for i in range(0xFFFFF7)]))
+        outfile.writeframes(bytes([5 for i in range(samples_count)]))
         #print(int.to_bytes(64, length=1, byteorder='big'))
     with open(args[0], 'rb') as infile:
-        print("wav_heading = [", end="")
-        not_is_first = False
+        rsc = 0 #reconstructed_samples_count
+        rscn = 0 #reconstructed_samples_count_byte_num
         bytes_counter = 0
         while True: 
             infile_byte = infile.read(1)
@@ -35,15 +36,20 @@ if __name__ == "__main__":
                 bytes_counter += 1
                 #print(infile_byte)
                 infile_byte_int = int.from_bytes(infile_byte)
-                if not_is_first:
-                    print(", ", end="")
                 not_is_first = True
-                print(infile_byte_int, end="")
+                if bytes_counter < 41:
+                    print(infile_byte_int, end=" ")
+                else:
+                    print(infile_byte, end=" ")
+                    if infile_byte_int != 0:
+                        rsc += infile_byte_int * (2**(rscn*8))
+                    rscn += 1
                 if bytes_counter == 44:
-                    print("]")
+                    print("")
                     break
             else:
-                print("]")
+                print("")
                 print(bytes_counter)
                 break
+        print(rsc)
             
