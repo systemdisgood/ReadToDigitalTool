@@ -47,22 +47,37 @@ large_unsigned count_file_bytes(FILE* infile)
 void generate_wav_file(FILE* infile, FILE* outfile)
 {
 	long old_file_position = ftell(infile);
-	for(uint8_t counter = 0; counter < WHWOQBQ; ++counter)
+	
+	// writing heading without quantity (last 4 bytes)
+	if(!(fwrite(wav_heading_without_quantity, 1, WHWOQBQ, outfile)))
 	{
-		if(!(fwrite(wav_heading_without_quantity, 1, WHWOQBQ, outfile)))
-		{
-			printf("CAN NOT WRITE BYTES TO FILE\n");
-		}
+		printf("CAN NOT WRITE BYTES TO FILE\n");
 	}
 
+	// counting bytes of the converting file
 	large_unsigned infile_bytes_quantity = count_file_bytes(infile);
-	//large_unsigned samples_quantity = 
+	// counting samples to write
+	large_unsigned samples_quantity = infile_bytes_quantity * sampling_frequency * sample_duration_ms / 1000; 
+	printf("%lld\n", (long long)samples_quantity);
 
-	large_unsigned accumulator = infile_bytes_quantity;
+	// converting samples quantity to 4 bytes number in the end of wav file heading
+	large_unsigned accumulator = samples_quantity;
+	large_unsigned last_accumulator = accumulator;
+	uint64_t powered_two = 1;
 	uint8_t heading_quantity_bytes[4];
 	for(uint8_t counter = 0; counter < 4; ++counter)
 	{
-		//accumulator =
+		for(uint8_t power = 0; power < (counter + 2) * 8 - 8; ++power)
+		{
+			powered_two = powered_two * 2;
+		}
+		//printf("%lld\n", (long long)powered_two);
+		//heading_quantity_bytes[counter] = accumulator %
+		accumulator = accumulator / 8;
+		heading_quantity_bytes[counter] = last_accumulator - accumulator;
+		printf("%lld\n", (long long)heading_quantity_bytes[counter]);
+		last_accumulator = accumulator;
+		powered_two = 1;
 	}
 	int character;
 	uint8_t byte_to_write = 0;
