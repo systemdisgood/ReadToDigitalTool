@@ -76,27 +76,61 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 		printf("CAN NOT WRITE BYTES TO FILE\n");
 	}
 
+	enum Symbol
+	{
+		ZERO,
+		ONE,
+		ZERONE
+	};
 	int character;
 	uint8_t byte_to_write = 0;
+	uint8_t symbol = 0;
 	bool bit_is_one = false;
 	bool bit_was_one = false;
-	bool was_not_stuffing = true;
+	bool zerone_needless = true;
 	uint8_t char_accumulator = 0;
 	while((character = fgetc(infile)) != EOF)
 	{
 		char_accumulator = character;
-		for(uint8_t bits_counter = 0; bist_counter < 8; ++bits_counter)
+		for(uint8_t bits_counter = 0; bits_counter < 8; ++bits_counter)
 		{
-			if(char_accumulator % 2) bit_is_one = true;
-			if(was_not_stuffing)
+			bit_is_one = (char_accumulator % 2) ? true : false;
+			char_accumulator /= 2;
+			if(((bit_is_one && bit_was_one) || (!bit_is_one && !bit_was_one)) && !zerone_needless)
 			{
-				if(is_bit_one && was_bit_one || !(is_bit_one && was_bit_one))
-				{
-
-				}
+				symbol = ZERONE;
+				zerone_needless = true;
 			}
+			else
+			{
+				if(bit_is_one)
+				{
+					symbol = ONE;
+				}
+				else
+				{
+					symbol = ZERO;
+				}
+				zerone_needless = false;
+			}
+			bit_was_one = bit_is_one ? true : false;
 
+			if(symbol == ONE)
+			{
+				printf("1");
+			}
+			if(symbol == ZERO)
+			{
+				printf("0");
+			}
+			if(symbol == ZERONE)
+			{
+				printf("_");
+			}
 		}
+		zerone_needless = true;
+
+		printf("\n");
 		if(!(fwrite(&byte_to_write, 1, 1, outfile)))
 		{
 			printf("CAN NOT WRITE BYTE TO FILE\n");
