@@ -58,27 +58,23 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 	large_unsigned infile_bytes_quantity = count_file_bytes(infile);
 	// counting samples to write
 	large_unsigned samples_quantity = infile_bytes_quantity * sampling_frequency * sample_duration_ms / 1000; 
-	printf("%lld\n", (long long)samples_quantity);
+	//printf("%lld\n", (long long)samples_quantity);
 
 	// converting samples quantity to 4 bytes number in the end of wav file heading
 	large_unsigned accumulator = samples_quantity;
-	large_unsigned last_accumulator = accumulator;
-	uint64_t powered_two = 1;
 	uint8_t heading_quantity_bytes[4];
 	for(uint8_t counter = 0; counter < 4; ++counter)
 	{
-		for(uint8_t power = 0; power < (counter + 2) * 8 - 8; ++power)
-		{
-			powered_two = powered_two * 2;
-		}
-		//printf("%lld\n", (long long)powered_two);
-		//heading_quantity_bytes[counter] = accumulator %
-		accumulator = accumulator / 8;
-		heading_quantity_bytes[counter] = last_accumulator - accumulator;
-		printf("%lld\n", (long long)heading_quantity_bytes[counter]);
-		last_accumulator = accumulator;
-		powered_two = 1;
+		heading_quantity_bytes[counter] = accumulator % 0x100;
+		accumulator = accumulator / 0x100;
+		//printf("%lld\n", (long long)heading_quantity_bytes[counter]);
 	}
+
+	if(!(fwrite(heading_quantity_bytes, 1, 4, outfile)))
+	{
+		printf("CAN NOT WRITE BYTES TO FILE\n");
+	}
+
 	int character;
 	uint8_t byte_to_write = 0;
 	while((character = fgetc(infile)) != EOF)
@@ -117,8 +113,8 @@ int main(int argc, char* argv[])
 		 return 0;
 	 }
 	
-	large_unsigned infile_bytes_quantity =  count_file_bytes(infile);
-	printf("%u\n", (unsigned)infile_bytes_quantity);
+	//large_unsigned infile_bytes_quantity =  count_file_bytes(infile);
+	//printf("%u\n", (unsigned)infile_bytes_quantity);
 	
 	generate_wav_file(infile, outfile);
 
