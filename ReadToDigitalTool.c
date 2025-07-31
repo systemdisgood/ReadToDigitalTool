@@ -69,7 +69,8 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 		accumulator = accumulator / 0x100;
 		//printf("%lld\n", (long long)heading_quantity_bytes[counter]);
 	}
-
+	
+	// writing samples quantity bytes to file
 	if(!(fwrite(heading_quantity_bytes, 1, 4, outfile)))
 	{
 		printf("CAN NOT WRITE BYTES TO FILE\n");
@@ -77,8 +78,25 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 
 	int character;
 	uint8_t byte_to_write = 0;
+	bool bit_is_one = false;
+	bool bit_was_one = false;
+	bool was_not_stuffing = true;
+	uint8_t char_accumulator = 0;
 	while((character = fgetc(infile)) != EOF)
 	{
+		char_accumulator = character;
+		for(uint8_t bits_counter = 0; bist_counter < 8; ++bits_counter)
+		{
+			if(char_accumulator % 2) bit_is_one = true;
+			if(was_not_stuffing)
+			{
+				if(is_bit_one && was_bit_one || !(is_bit_one && was_bit_one))
+				{
+
+				}
+			}
+
+		}
 		if(!(fwrite(&byte_to_write, 1, 1, outfile)))
 		{
 			printf("CAN NOT WRITE BYTE TO FILE\n");
