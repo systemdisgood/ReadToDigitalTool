@@ -57,7 +57,8 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 	// counting bytes of the converting file
 	large_unsigned infile_bytes_quantity = count_file_bytes(infile);
 	// counting samples to write
-	large_unsigned samples_quantity = infile_bytes_quantity * sampling_frequency * sample_duration_ms / 1000; 
+	large_unsigned sample_duration_samples = sample_duration_ms / 1000;
+	large_unsigned samples_quantity = (8+1) * infile_bytes_quantity * sampling_frequency * sample_duration_samples; 
 	//printf("%lld\n", (long long)samples_quantity);
 
 	// converting samples quantity to 4 bytes number in the end of wav file heading
