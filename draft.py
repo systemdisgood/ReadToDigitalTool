@@ -3,7 +3,32 @@ import sys
 import math
 import wave
 
-if __name__ == "__main__":
+def calc_nco_incr(f, sf, denominator_pow):
+    denominator = 2**denominator_pow - 1
+    hz_incr = denominator / sf
+    return int(hz_incr * f)
+
+
+def calc_cordic_coefs():
+
+
+if __name__ == "__main__" and True:
+    
+    sampling_freq = 44100
+
+    zero_freq = 440
+    zerone_freq = 659.26
+    one_freq =  997.76
+
+    zero_freq_incr = calc_nco_incr(zero_freq, sampling_freq, 32)
+    print(zero_freq_incr)
+    zerone_freq_incr = calc_nco_incr(zerone_freq, sampling_freq, 32)
+    print(zerone_freq_incr)
+    one_freq_incr = calc_nco_incr(one_freq, sampling_freq, 32)
+    print(one_freq_incr)
+
+
+if __name__ == "__main__" and False:
 
     TONE = 641
     SAMPLING_FREQUENCY = 44100

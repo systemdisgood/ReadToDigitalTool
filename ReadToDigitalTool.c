@@ -27,6 +27,11 @@ const double one_frequency = 997.76;
 const unsigned sampling_frequency = 44100;
 const unsigned sample_duration_ms = 500;
 
+const uint32_t zero_nco_incr = 42852281;
+const uint32_t zerone_nco_incr = 64206352;
+const uint32_t one_nco_incr = 97173391;
+
+
 unsigned infile_name_len = 0;
 FILE* infile = NULL;
 
@@ -132,6 +137,9 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 		zerone_needless = true;
 
 		printf("\n");
+		
+		//getchar();
+
 		if(!(fwrite(&byte_to_write, 1, 1, outfile)))
 		{
 			printf("CAN NOT WRITE BYTE TO FILE\n");
