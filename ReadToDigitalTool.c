@@ -27,7 +27,7 @@ const double zero_frequency = 440;
 const double stuffing_frequency = 659.26;
 const double one_frequency = 997.76;
 const unsigned sampling_frequency = 44100;
-const unsigned symbol_duration_ms = 500;
+const unsigned symbol_duration_ms = 250;
 
 const uint32_t zero_nco_incr = 42852281;
 const uint32_t zerone_nco_incr = 64206352;
@@ -65,7 +65,7 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 	large_unsigned infile_bytes_quantity = count_file_bytes(infile);
 	// counting samples to write
 	large_unsigned symbol_duration_samples = sampling_frequency * symbol_duration_ms / 1000;
-	large_unsigned samples_quantity = (8+1) * infile_bytes_quantity * symbol_duration_samples; 
+	large_unsigned samples_quantity = (8+2) * infile_bytes_quantity * symbol_duration_samples; 
 	//printf("%lld\n", (long long)samples_quantity);
 
 	// converting samples quantity to 4 bytes number in the end of wav file heading
@@ -128,11 +128,12 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 			switch(symbol)
 			{
 				case ONE:
-					printf("1");
+					//printf("1");
 					for(uint32_t samples_counter = 0; samples_counter < symbol_duration_samples; ++ samples_counter)
 					{
 						phase = (M_PI * 2 * ((double)nco_counter / 0xFFFFFFFF));
-						byte_to_write = 5 * sin(phase);
+						//byte_to_write = samples_counter;
+						byte_to_write = 127 * (sin(phase) + 1);
 						if(!(fwrite(&byte_to_write, 1, 1, outfile)))
 						{
 							printf("CAN NOT WRITE BYTES TO FILE\n");
@@ -141,16 +142,45 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 					}
 					break;
 				case ZERO:
-					printf("0");
+					//printf("0");
+                    for(uint32_t samples_counter = 0; samples_counter < symbol_duration_samples; ++ samples_counter)
+                    {
+                    	phase = (M_PI * 2 * ((double)nco_counter / 0xFFFFFFFF));
+                        //byte_to_write = samples_counter;
+                        byte_to_write = 127 * (sin(phase) + 1);
+                        if(!(fwrite(&byte_to_write, 1, 1, outfile)))
+                        {
+                            printf("CAN NOT WRITE BYTES TO FILE\n");
+                        }
+                        nco_counter += zero_nco_incr;
+                    }
 					break;
 				case ZERONE:
-					printf("_");
+					//printf("_");
+                    for(uint32_t samples_counter = 0; samples_counter < symbol_duration_samples; ++ samples_counter)
+                    {
+						phase = (M_PI * 2 * ((double)nco_counter / 0xFFFFFFFF));
+                        //byte_to_write = samples_counter;
+                        byte_to_write = 127 * (sin(phase) + 1);
+                        if(!(fwrite(&byte_to_write, 1, 1, outfile)))
+                        {
+                        	printf("CAN NOT WRITE BYTES TO FILE\n");
+                        }
+                        nco_counter += zerone_nco_incr;
+                    }
 
 			}
 		}
 		zerone_needless = true;
-
-		printf("\n");
+		for(uint32_t samples_counter = 0; samples_counter < symbol_duration_samples * 2; ++ samples_counter)
+		{
+			byte_to_write = 127;
+			if(!(fwrite(&byte_to_write, 1, 1, outfile)))
+			{
+				 printf("CAN NOT WRITE BYTES TO FILE\n");
+			}
+		}
+		//printf("\n");
 		
 		//getchar();
 
@@ -183,10 +213,10 @@ int main(int argc, char* argv[])
 	outfile_name_len = strlen(argv[2]);
 	outfile = fopen(argv[2], "w");
 	if(!outfile)
-     {
-		 printf("Can't open the outlut file\n");
-		 return 0;
-	 }
+    {
+		printf("Can't open the outlut file\n");
+		return 0;
+	}
 	
 	//large_unsigned infile_bytes_quantity =  count_file_bytes(infile);
 	//printf("%u\n", (unsigned)infile_bytes_quantity);
