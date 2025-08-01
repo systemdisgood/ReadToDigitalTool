@@ -131,8 +131,8 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 					printf("1");
 					for(uint32_t samples_counter = 0; samples_counter < symbol_duration_samples; ++ samples_counter)
 					{
-						phase = (M_PI * 2 * (nco_counter / 0xFFFFFFFF));
-						byte_to_write = 127 * sin(phase);
+						phase = (M_PI * 2 * ((double)nco_counter / 0xFFFFFFFF));
+						byte_to_write = 5 * sin(phase);
 						if(!(fwrite(&byte_to_write, 1, 1, outfile)))
 						{
 							printf("CAN NOT WRITE BYTES TO FILE\n");
