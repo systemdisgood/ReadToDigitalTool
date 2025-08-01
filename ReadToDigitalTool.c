@@ -2,7 +2,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-
+//#define _USE_MATH_DEFINES
+#include <math.h>
+#define M_PI 3.14159265358979323846
 // WAV_HEADING_WITHOUT_QUANTITY_BYTES_QUANTITY
 #define WHWOQBQ 40
 
@@ -95,6 +97,8 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 	bool bit_was_one = false;
 	bool zerone_needless = true;
 	uint8_t char_accumulator = 0;
+	uint32_t nco_counter = 0;
+	double phase = 0;
 	while((character = fgetc(infile)) != EOF)
 	{
 		char_accumulator = character;
@@ -121,17 +125,24 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 			}
 			bit_was_one = bit_is_one ? true : false;
 
-			if(symbol == ONE)
+			switch(symbol)
 			{
-				printf("1");
-			}
-			if(symbol == ZERO)
-			{
-				printf("0");
-			}
-			if(symbol == ZERONE)
-			{
-				printf("_");
+				case ONE:
+					printf("1");
+					byte_to_write = 255 * sin(phase);
+					//byte_to_write = 255 * sin((double)(M_PI * 2 * (nco_counter / 0xFFFFFFFF)));
+					if(!(fwrite(&byte_to_write, 1, 1, outfile)))
+					{
+						printf("CAN NOT WRITE BYTES TO FILE\n");
+					}
+					nco_counter += one_nco_incr;
+					break;
+				case ZERO:
+					printf("0");
+					break;
+				case ZERONE:
+					printf("_");
+
 			}
 		}
 		zerone_needless = true;

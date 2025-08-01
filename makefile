@@ -1,7 +1,7 @@
 #CC=clang
 CC=gcc
 CFLAGS=-c -Wall -pedantic -std=c99
-LDFLAGS=
+LDFLAGS= -lm
 SOURCES=ReadToDigitalTool.c 
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=ReadToDigitalTool.out

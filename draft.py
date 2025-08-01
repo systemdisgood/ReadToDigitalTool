@@ -9,13 +9,19 @@ def calc_nco_incr(f, sf, denominator_pow):
     return int(hz_incr * f)
 
 
-def calc_cordic_coefs():
-
+def calc_cordic_coefs(steps):
+	coefs = []
+	for i in range(steps):
+		coefs.append([])
+		coefs[-1].append(math.sin((math.pi/2)/(i+1)))
+		coefs[-1].append(math.cos((math.pi/2)/(i+1)))
+		print(coefs[-1][-2], end=" ")
+		print(coefs[-1][-1])
 
 if __name__ == "__main__" and True:
-    
-    sampling_freq = 44100
 
+    coefs = calc_cordic_coefs()
+    sampling_freq = 44100
     zero_freq = 440
     zerone_freq = 659.26
     one_freq =  997.76
@@ -32,7 +38,7 @@ if __name__ == "__main__" and False:
 
     TONE = 641
     SAMPLING_FREQUENCY = 44100
-    PHASE_STEP = 2*math.pi*(TONE/SAMPLING_FREQUENCY) 
+    PHASE_STEP = 2*math.pi*(TONE/SAMPLING_FREQUENCY)
     phase = 0
     need_space = False
     need_enter = False
