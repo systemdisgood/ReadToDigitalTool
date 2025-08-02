@@ -19,7 +19,7 @@ nco_counter_t  max_beep_nco_counter = -1; // unsigned underflow
 
 nco_counter_t beep_nco_counter = 0; // beep phase is beep_nco_counter / max_beep_nco_counter
 
-
+const uint32_t PAUSES_QUANTITY = 2;
 
 //const uint32_t zero_nco_incr = 42852281;
 //const uint32_t zerone_nco_incr = 64206352;
@@ -64,7 +64,7 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 	large_unsigned infile_bytes_quantity = count_file_bytes(infile);
 	// counting samples to write
 	large_unsigned symbol_duration_samples = sampling_frequency * symbol_duration_ms / 1000;
-	large_unsigned samples_quantity = (8+2) * infile_bytes_quantity * symbol_duration_samples; 
+	large_unsigned samples_quantity = (8+PAUSES_QUANTITY) * infile_bytes_quantity * symbol_duration_samples; 
 	//printf("%lld\n", (long long)samples_quantity);
 
 	// converting samples quantity to 4 bytes number in the end of wav file heading
@@ -172,7 +172,7 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 			}
 		}
 		zerone_needless = true;
-		for(uint32_t samples_counter = 0; samples_counter < symbol_duration_samples; ++samples_counter)
+		for(uint32_t samples_counter = 0; samples_counter < symbol_duration_samples * PAUSES_QUANTITY; ++samples_counter)
 		{
             phase = (M_PI * 2 * ((double)nco_counter / 0xFFFFFFFF));
 			byte_to_write = 127 * (sin(phase) + 1);
