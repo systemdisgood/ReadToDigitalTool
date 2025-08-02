@@ -23,7 +23,7 @@ nco_counter_t beep_nco_counter = 0; // beep phase is beep_nco_counter / max_beep
 
 const uint32_t PAUSES_QUANTITY = 2;
 
-const uint64_t MAX_FILE_SAMPLES_QUANTITY = 0x4F;
+const uint64_t MAX_FILE_SAMPLES_QUANTITY = 1000000000;
 
 //const uint32_t zero_nco_incr = 42852281;
 //const uint32_t zerone_nco_incr = 64206352;
@@ -42,6 +42,7 @@ FILE* infile = NULL;
 
 unsigned outfile_name_len = 0;
 FILE* outfile = NULL;
+bool outfile_closed = false;
 
 large_unsigned count_file_bytes(FILE* infile)
 {
@@ -54,8 +55,16 @@ large_unsigned count_file_bytes(FILE* infile)
     return quantity;
 }
 
-void generate_wav_file(FILE* infile, FILE* outfile)
+void generate_wav_file(FILE* infile, char* outfile_name_beg)
 {
+
+	outfile_name_len = strlen(argv[2]); 
+	outfile = fopen(argv[2], "w"); 
+	if(!outfile) 
+	{ 
+		printf("Can't open the outlut file\n"); return 0;
+	}
+
     long old_file_position = ftell(infile);
     
     // writing heading without quantity (last 4 bytes)
@@ -105,7 +114,7 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 	uint8_t char_accumulator = 0;
 	uint32_t nco_counter = 0;
 	double phase = 0;
-	uint64_t samples_counter = 0;
+	uint64_t outfile_samples_counter = 0;
 	while((character = fgetc(infile)) != EOF)
 	{
 		char_accumulator = character;
@@ -146,6 +155,7 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 							printf("CAN NOT WRITE BYTES TO FILE\n");
 						}
 						nco_counter += one_nco_incr;
+						++outfile_samples_counter;
 					}
 					break;
 				case ZERO:
@@ -160,6 +170,7 @@ void generate_wav_file(FILE* infile, FILE* outfile)
                             printf("CAN NOT WRITE BYTES TO FILE\n");
                         }
                         nco_counter += zero_nco_incr;
+						++outfile_samples_counter;
                     }
 					break;
 				case ZERONE:
@@ -174,6 +185,7 @@ void generate_wav_file(FILE* infile, FILE* outfile)
                         	printf("CAN NOT WRITE BYTES TO FILE\n");
                         }
                         nco_counter += zerone_nco_incr;
+						++outfile_samples_counter;
                     }
 
 			}
@@ -189,6 +201,7 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 				 printf("CAN NOT WRITE BYTES TO FILE\n");
 			}
             nco_counter += pause_nco_incr;
+			++outfile_samples_counter;
 		}
 		//printf("\n");
 		
@@ -198,8 +211,7 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 		{
 			printf("CAN NOT WRITE BYTE TO FILE\n");
 		}
-		++samples_counter;
-		if(samples_counter >= MAX_FILE_SAMPLES_QUANTITY) break;
+		if(outfile_samples_counter >= MAX_FILE_SAMPLES_QUANTITY) break;
 	}
 
 	fseek(infile, old_file_position, SEEK_SET);
@@ -222,13 +234,6 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 	
-	outfile_name_len = strlen(argv[2]);
-	outfile = fopen(argv[2], "w");
-	if(!outfile)
-    {
-		printf("Can't open the outlut file\n");
-		return 0;
-	}
 	
 	//large_unsigned infile_bytes_quantity =  count_file_bytes(infile);
 	//printf("%u\n", (unsigned)infile_bytes_quantity);
