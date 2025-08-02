@@ -5,9 +5,11 @@
 //#define _USE_MATH_DEFINES
 #include <math.h>
 #define M_PI 3.14159265358979323846
+
 // WAV_HEADING_WITHOUT_QUANTITY_BYTES_QUANTITY
 #define WHWOQBQ 40
 
+// WAV_HEADING_WITHOUT_QUANTITY_BYTES
 //[82, 73, 70, 70, 36, 1, 0, 0, 87, 65, 86, 69, 102, 109, 116, 32, 16, 0, 0, 0, 1, 0, 1, 0, 68, 172, 0, 0, 68, 172, 0, 0, 1, 0, 8, 0, 100, 97, 116, 97, b'\x00', b'\x01', b'\x00', b'\x00']
 
 const uint8_t wav_heading_without_quantity[WHWOQBQ] = {82, 73, 70, 70, 36, 1, 0, 0, 87, 65, 86, 69, 102, 109, 116, 32, 16, 0, 0, 0, 1, 0, 1, 0, 68, 172, 0, 0, 68, 172, 0, 0, 1, 0, 8, 0, 100, 97, 116, 97};
@@ -21,6 +23,8 @@ nco_counter_t beep_nco_counter = 0; // beep phase is beep_nco_counter / max_beep
 
 const uint32_t PAUSES_QUANTITY = 2;
 
+const uint64_t MAX_FILE_SAMPLES_QUANTITY = 0x4F;
+
 //const uint32_t zero_nco_incr = 42852281;
 //const uint32_t zerone_nco_incr = 64206352;
 //const uint32_t one_nco_incr = 97173391;
@@ -31,7 +35,7 @@ const uint32_t one_nco_incr = 68024101;
 const uint32_t pause_nco_incr = 80893420;
 
 const double sampling_frequency = 44100;
-const uint32_t symbol_duration_ms = 50;
+const uint32_t symbol_duration_ms = 500;
 
 unsigned infile_name_len = 0;
 FILE* infile = NULL;
@@ -66,6 +70,8 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 	large_unsigned symbol_duration_samples = sampling_frequency * symbol_duration_ms / 1000;
 	large_unsigned samples_quantity = (8+PAUSES_QUANTITY) * infile_bytes_quantity * symbol_duration_samples; 
 	//printf("%lld\n", (long long)samples_quantity);
+	
+	
 
 	// converting samples quantity to 4 bytes number in the end of wav file heading
 	large_unsigned accumulator = samples_quantity;
@@ -99,6 +105,7 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 	uint8_t char_accumulator = 0;
 	uint32_t nco_counter = 0;
 	double phase = 0;
+	uint64_t samples_counter = 0;
 	while((character = fgetc(infile)) != EOF)
 	{
 		char_accumulator = character;
@@ -191,6 +198,8 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 		{
 			printf("CAN NOT WRITE BYTE TO FILE\n");
 		}
+		++samples_counter;
+		if(samples_counter >= MAX_FILE_SAMPLES_QUANTITY) break;
 	}
 
 	fseek(infile, old_file_position, SEEK_SET);
