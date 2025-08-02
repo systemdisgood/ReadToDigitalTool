@@ -19,20 +19,19 @@ nco_counter_t  max_beep_nco_counter = -1; // unsigned underflow
 
 nco_counter_t beep_nco_counter = 0; // beep phase is beep_nco_counter / max_beep_nco_counter
 
-// A - zero
-// E - zero or one (stuffing)
-// B - one
 
-const double zero_frequency = 440;
-const double stuffing_frequency = 659.26;
-const double one_frequency = 997.76;
-const unsigned sampling_frequency = 44100;
-const unsigned symbol_duration_ms = 250;
 
-const uint32_t zero_nco_incr = 42852281;
-const uint32_t zerone_nco_incr = 64206352;
-const uint32_t one_nco_incr = 97173391;
+//const uint32_t zero_nco_incr = 42852281;
+//const uint32_t zerone_nco_incr = 64206352;
+//const uint32_t one_nco_incr = 97173391;
 
+const uint32_t zero_nco_incr = 48099738;
+const uint32_t zerone_nco_incr = 57200004;
+const uint32_t one_nco_incr = 68024101;
+const uint32_t pause_nco_incr = 80893420;
+
+const double sampling_frequency = 44100;
+const uint32_t symbol_duration_ms = 50;
 
 unsigned infile_name_len = 0;
 FILE* infile = NULL;
@@ -42,21 +41,21 @@ FILE* outfile = NULL;
 
 large_unsigned count_file_bytes(FILE* infile)
 {
-	long old_file_position = ftell(infile);
-	large_unsigned quantity = 0;
-	int character;
-	fseek(infile, 0, SEEK_SET);
-	while((character = fgetc(infile)) != EOF) ++quantity;
-	fseek(infile, old_file_position, SEEK_SET);
-	return quantity;
+    long old_file_position = ftell(infile);
+    large_unsigned quantity = 0;
+    int character;
+    fseek(infile, 0, SEEK_SET);
+    while((character = fgetc(infile)) != EOF) ++quantity;
+    fseek(infile, old_file_position, SEEK_SET);
+    return quantity;
 }
 
 void generate_wav_file(FILE* infile, FILE* outfile)
 {
-	long old_file_position = ftell(infile);
-	
-	// writing heading without quantity (last 4 bytes)
-	if(!(fwrite(wav_heading_without_quantity, 1, WHWOQBQ, outfile)))
+    long old_file_position = ftell(infile);
+    
+    // writing heading without quantity (last 4 bytes)
+    if(!(fwrite(wav_heading_without_quantity, 1, WHWOQBQ, outfile)))
 	{
 		printf("CAN NOT WRITE BYTES TO FILE\n");
 	}
@@ -88,7 +87,8 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 	{
 		ZERO,
 		ONE,
-		ZERONE
+		ZERONE,
+        PAUSE
 	};
 	int character;
 	uint8_t byte_to_write = 0;
@@ -143,7 +143,7 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 					break;
 				case ZERO:
 					//printf("0");
-                    for(uint32_t samples_counter = 0; samples_counter < symbol_duration_samples; ++ samples_counter)
+                    for(uint32_t samples_counter = 0; samples_counter < symbol_duration_samples; ++samples_counter)
                     {
                     	phase = (M_PI * 2 * ((double)nco_counter / 0xFFFFFFFF));
                         //byte_to_write = samples_counter;
@@ -157,7 +157,7 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 					break;
 				case ZERONE:
 					//printf("_");
-                    for(uint32_t samples_counter = 0; samples_counter < symbol_duration_samples; ++ samples_counter)
+                    for(uint32_t samples_counter = 0; samples_counter < symbol_duration_samples; ++samples_counter)
                     {
 						phase = (M_PI * 2 * ((double)nco_counter / 0xFFFFFFFF));
                         //byte_to_write = samples_counter;
@@ -172,13 +172,16 @@ void generate_wav_file(FILE* infile, FILE* outfile)
 			}
 		}
 		zerone_needless = true;
-		for(uint32_t samples_counter = 0; samples_counter < symbol_duration_samples * 2; ++ samples_counter)
+		for(uint32_t samples_counter = 0; samples_counter < symbol_duration_samples; ++samples_counter)
 		{
-			byte_to_write = 127;
+            phase = (M_PI * 2 * ((double)nco_counter / 0xFFFFFFFF));
+			byte_to_write = 127 * (sin(phase) + 1);
+            //byte_to_write = 127;
 			if(!(fwrite(&byte_to_write, 1, 1, outfile)))
 			{
 				 printf("CAN NOT WRITE BYTES TO FILE\n");
 			}
+            nco_counter += pause_nco_incr;
 		}
 		//printf("\n");
 		

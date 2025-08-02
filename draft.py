@@ -20,18 +20,26 @@ def calc_cordic_coefs(steps):
 
 if __name__ == "__main__" and True:
 
-    coefs = calc_cordic_coefs()
+    coefs = calc_cordic_coefs(30)
+    
     sampling_freq = 44100
-    zero_freq = 440
-    zerone_freq = 659.26
-    one_freq =  997.76
+    #zero_freq = 440
+	#zerone_freq = 659.26
+    #one_freq =  997.76
+    
+    zero_freq = 493.88
+    zerone_freq = 587.32
+    one_freq = 698.46
+    pause_freq = 830.60
 
-    zero_freq_incr = calc_nco_incr(zero_freq, sampling_freq, 32)
-    print(zero_freq_incr)
-    zerone_freq_incr = calc_nco_incr(zerone_freq, sampling_freq, 32)
-    print(zerone_freq_incr)
-    one_freq_incr = calc_nco_incr(one_freq, sampling_freq, 32)
-    print(one_freq_incr)
+    zero_nco_incr = calc_nco_incr(zero_freq, sampling_freq, 32)
+    print("zero_nco_incr = " + str(zero_nco_incr))
+    zerone_nco_incr = calc_nco_incr(zerone_freq, sampling_freq, 32)
+    print("zerone_nco_incr = " + str(zerone_nco_incr))
+    one_nco_incr = calc_nco_incr(one_freq, sampling_freq, 32)
+    print("one_nco_incr = " + str(one_nco_incr))
+    pause_nco_incr = calc_nco_incr(pause_freq, sampling_freq, 32)
+    print("pause_nco_incr = " + str(pause_nco_incr))
 
 
 if __name__ == "__main__" and False:
