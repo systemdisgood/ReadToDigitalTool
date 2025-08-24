@@ -6,6 +6,10 @@
 #include <math.h>
 #define M_PI 3.14159265358979323846
 
+#define STR_BUF_LEN 83
+char str_buf_0[STR_BUF_LEN];
+char str_buf_1[STR_BUF_LEN];
+
 // WAV_HEADING_WITHOUT_QUANTITY_BYTES_QUANTITY
 #define WHWOQBQ 40
 
@@ -24,6 +28,7 @@ nco_counter_t beep_nco_counter = 0; // beep phase is beep_nco_counter / max_beep
 const uint32_t PAUSES_QUANTITY = 2;
 
 const uint64_t MAX_FILE_SAMPLES_QUANTITY = 1000000000;
+const uint64_t MAX_FILE_READING_BYTES = 1024;
 
 //const uint32_t zero_nco_incr = 42852281;
 //const uint32_t zerone_nco_incr = 64206352;
@@ -55,18 +60,19 @@ large_unsigned count_file_bytes(FILE* infile)
     return quantity;
 }
 
-void generate_wav_file(FILE* infile, char* outfile_name_beg)
-{
 
-	outfile_name_len = strlen(argv[2]); 
-	outfile = fopen(argv[2], "w"); 
-	if(!outfile) 
-	{ 
-		printf("Can't open the outlut file\n"); return 0;
-	}
+
+void generate_wav_file(FILE* infile, char* outfile_name_without_extention, uint32_t start_kilobyte, uint32_t stop_kilobyte, uint32_t bits_per_second)
+{
+	outfile_name_len = strlen(outfile_name_without_extention);
+	if(outfile_name_len > STR_BUF_LEN - 10) printf("ERROR");
 
     long old_file_position = ftell(infile);
     
+	for(uint8_t i = 0;str_buf_0[i] != '\0'; ++i) str_buf_0[i] = '\0';          for(uint8_t i = 0;str_buf_1[i] != '\0'; ++i) str_buf_1[i] = '\0';          strcpy(str_buf_0,outfile_name_without_extention);                          sprintf(str_buf_1,"_0");                                                   strcat(str_buf_0, str_buf_1);
+    outfile = fopen(argv[2], "w");                                             if(!outfile)
+    {
+        printf("Can't open the outlput file\n"); return 0;                     }
     // writing heading without quantity (last 4 bytes)
     if(!(fwrite(wav_heading_without_quantity, 1, WHWOQBQ, outfile)))
 	{
@@ -218,29 +224,31 @@ void generate_wav_file(FILE* infile, char* outfile_name_beg)
 }
 
 
+
 int main(int argc, char* argv[])
 {
-	if(argc != 3)
+	if(argc != 5)
 	{
-		printf("Must be 2 arguments\n");
+		printf("Must be 5 arguments\n");
+		printf("ReadToDigitalTool input_file_path output_file_path_without_extention start_kilobyte, stop_kilobyte, bits_per_second\n");
 		return 0;
 	}
 
-	infile_name_len = strlen(argv[1]);
 	infile = fopen(argv[1], "r");
 	if(!infile)
 	{
 		printf("Can't open the input file\n");
 		return 0;
 	}
-	
-	
+		
 	//large_unsigned infile_bytes_quantity =  count_file_bytes(infile);
 	//printf("%u\n", (unsigned)infile_bytes_quantity);
-	
-	generate_wav_file(infile, outfile);
+
+	uint32_t start_kilobyte = atoi(argv[3]);
+	uint32_t stop_kilobyte = atoi(argv[4]);
+	uint32_t bits_per_second = atoi[5];;
+	generate_wav_file(infile, argv[2], start_kilobyte, stop_kilobyte, bits_per_second);
 
 	fclose(infile);
-	fclose(outfile);
 	return 0;
 }

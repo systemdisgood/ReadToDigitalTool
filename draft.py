@@ -27,10 +27,15 @@ if __name__ == "__main__" and True:
 	#zerone_freq = 659.26
     #one_freq =  997.76
     
-    zero_freq = 493.88
+    zero_freq = 493.88 
     zerone_freq = 587.32
     one_freq = 698.46
     pause_freq = 830.60
+
+    zero_freq = 987.76
+    zerone_freq = 1174.64
+    one_freq = 1396.92
+    pause_freq = 1661.20
 
     zero_nco_incr = calc_nco_incr(zero_freq, sampling_freq, 32)
     print("zero_nco_incr = " + str(zero_nco_incr))
